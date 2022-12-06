@@ -1,4 +1,5 @@
-
+#'parallelhEDA
+#'@export
 parallelhEDA<-function(strata, cv,
                        sugg,
                        Temp=0.0001,initialStrata=15, decrement_constant=0.95, end_time =140,

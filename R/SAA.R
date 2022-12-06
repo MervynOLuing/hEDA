@@ -1,3 +1,4 @@
+#'Simulated Annealing Algorithm (SAA)
 #'@export
 SAA<-function (strata, errors, suggestions = NULL,
                          Temp=NA,initialStrata, decrement_constant=0.95, end_time =140,

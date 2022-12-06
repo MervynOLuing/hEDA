@@ -1,3 +1,5 @@
+#'kmedoidsSolution
+#'@export
 kmedoidsSolution<- function(strata,
                             errors,
                             nstrata = NA,

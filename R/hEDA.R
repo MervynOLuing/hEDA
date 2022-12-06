@@ -1,3 +1,5 @@
+#'hybrid Estimation of Distribution Algorithm (hEDA)
+#'@export
 hEDA<-function (stra, err, suggestions =NULL,
                    Temp=0.01,initialStrata, decrement_constant=0.95, end_time =140,
                   jsize=10,length_of_markov_chain =5,

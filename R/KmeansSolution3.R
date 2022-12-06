@@ -1,3 +1,5 @@
+#'KmeansSolution3
+#'@export
 KmeansSolution3<-function (strata, errors, nstrata = NA, minnumstrat = 2, maxclusters = NA,
                            showPlot = TRUE)
 {

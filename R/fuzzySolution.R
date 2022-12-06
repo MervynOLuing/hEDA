@@ -1,4 +1,5 @@
-
+#'fuzzySolution
+#'@export
 fuzzySolution<-function (strata, cv,m=2,
                          minClusters=2,
                       maxclusters=20, scale=TRUE,censiti=0)

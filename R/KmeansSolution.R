@@ -1,3 +1,5 @@
+#'KmeansSolution
+#'@export
 KmeansSolution <- function(strata,
                              errors,
                              nstrata = NA,
