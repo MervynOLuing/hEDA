@@ -34,7 +34,7 @@ parallelhEDA<-function(strata, cv,
   #ptm <- proc.time()
   r <- foreach::foreach(i = 1:ndom,
                         .combine = rbind,
-                        .packages = c("HEDA","Rcpp2doParallel")#,.verbose = TRUE
+                        .packages = c("hEDA","Rcpp2doParallel")#,.verbose = TRUE
   ) %dopar% {
 
     nvar=length(grep("CV",names(cv[i,])))
