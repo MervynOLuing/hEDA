@@ -138,7 +138,7 @@ SAA<-function (strata, errors, suggestions = NULL,
         strataDelta<-rbind(strataReplace,strataOrig)
 
 
-        strcorDelta <-aggrStrata_RcppOpen(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+        strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
                                           dominio=dominio)
         strcorDelta <-as.data.frame(strcorDelta)
         newstrcor<-NULL
