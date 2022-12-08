@@ -133,7 +133,7 @@ hEDA<-function (stra, err, suggestions =NULL,
     }
         population<-reorderedPop
 
-      }else if((iter %% BOAfreq)==0){
+      }else if((iter %% EDAfreq)==0){
 
               probsTable<-list()
           elitePop<-reorderedPop[1:elitismR,]
