@@ -23,7 +23,8 @@ KmeansSolution <- function(strata,
       stratacorr <- strata[strata$DOM1 == k,]
       errorscorr <- errors[errors$domainvalue == k,]
       stratacorr<-as.data.frame(stratacorr)
-      aggr <- aggrStrata_RcppOpen(strata=stratacorr,
+      #aggr <- aggrStrata_RcppOpen(strata=stratacorr,
+      aggr <- aggrStrata(strata=stratacorr,
                          nvar=nvariables,
                          censiti=0,
                          vett=rep(1,nrow(stratacorr)),
@@ -53,7 +54,7 @@ KmeansSolution <- function(strata,
         stmt <- paste(stmt1,stmt2,stmt3,sep="")
         solution <- tryCatch(eval(parse(text = stmt)))
         stratacorr<-as.data.frame(stratacorr)
-        aggr <- aggrStrata_RcppOpen(strata=stratacorr,
+        aggr <- aggrStrata(strata=stratacorr,
                            nvar=nvariables,
                            censiti=0,
                            vett=solution,
