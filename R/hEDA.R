@@ -40,7 +40,7 @@ hEDA<-function (stra, err, suggestions =NULL,
   evaluateRcpp<-function(sugg){
 
 
-    newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
+    newstr<-aggrStrata(stra, nvar, sugg, censiti,
                                   dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
