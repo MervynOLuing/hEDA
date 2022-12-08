@@ -45,7 +45,7 @@ parallelhEDA<-function(strata, cv,
     SAArun=SAArun;SAAiters=SAAiters;
     popSize = popSize ; iters = iters; mutationChance = mutationChance; elitism =elitism ;
    addStrataFactor=addStrataFactor; EDAfreq=EDAfreq;
-    verbose = verbose; dominio=dominio;minnumstrat=minnumstrat;kmax_percent=kmax_percent;ProbNewStratum=ProbNewStratum;
+    verbose = verbose; dominio=dom[i];minnumstrat=minnumstrat;kmax_percent=kmax_percent;ProbNewStratum=ProbNewStratum;
     strcens=strcens;writeFiles=writeFiles; showPlot=showPlot; minTemp = minTemp; realAllocation=realAllocation
     censiti <-0
    hEDA(stra, err, suggestions ,
@@ -54,7 +54,7 @@ parallelhEDA<-function(strata, cv,
      SAArun,SAAiters,
      popSize, iters, mutationChance, elitism,
      addStrataFactor, EDAfreq,
-     verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
+     verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
      strcens,writeFiles, showPlot, minTemp, realAllocation)
 
 
