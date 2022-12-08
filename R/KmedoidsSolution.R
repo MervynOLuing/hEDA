@@ -82,5 +82,6 @@ kmedoidsSolution<- function(strata,
     cat("\n Number of strata: ", best_num_strata[i])
     cat("\n Sample size     : ", best[i])
   }
+  cat("\n Total Sample size     : ", sum(best))
  return(solutionKmedoid)
 }
