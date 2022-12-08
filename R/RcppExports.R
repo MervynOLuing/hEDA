@@ -7,5 +7,5 @@ Rcpp_sortDelta <- function(x) {
 
 #aggrStrata_RcppOpen <- function(strata, nvar, vett, censiti, dominio) {
 #    .Call('_hEDA_aggrStrata_RcppOpen', PACKAGE = 'hEDA', strata, nvar, vett, censiti, dominio)
-}
+#}
 
