@@ -5,7 +5,7 @@ hEDA<-function (stra, err, suggestions =NULL,
                   jsize=10,length_of_markov_chain =5,
                    SAArun=TRUE,SAAiters=1000,
                    popSize = 200, iters = 100, mutationChance = NA, elitism = NA,
-                   addStrataFactor=0.1, BOAfreq=BOAfreq,
+                   addStrataFactor=0.1, EDAfreq=EDAfreq,
                    verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
                    strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
 
