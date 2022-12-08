@@ -75,7 +75,7 @@ kmedoidsSolution<- function(strata,
                                    stringsAsFactors = TRUE)
   solutionKmedoid$domainvalue <- as.integer(solutionKmedoid$domainvalue)
   cat("\n-----------------\n")
-  cat("\n Kmeans solution ")
+  cat("\n Kmedoids solution ")
   cat("\n-----------------")
   for (i in c(1:ndom)) {
     cat("\n *** Domain: ", i, " ***")
