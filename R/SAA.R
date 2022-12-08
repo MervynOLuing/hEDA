@@ -56,7 +56,8 @@ SAA<-function (strata, errors, suggestions = NULL,
     censiti <- 0
     solution<-floor(solution)
     if( "matrix"%in%class(solution)){solution<-solution[1,]}
-    strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,
+    #strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,
+    strcor <- aggrStrata(strata, nvar, solution, censiti,
                                  dominio=dominio)
 
     dimsamp <- nrow(strcor)
