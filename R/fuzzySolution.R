@@ -26,7 +26,7 @@ for(DOM in 1:ndom){
   if (maxclusters >= (nrow(data_train_matrix)-2)){maxclusters<-(nrow(data_train_matrix)-2)}
   for(i in 1:maxclusters){
     #needs more than one cluster, hence k+1
-    set.seed(1234)
+   # set.seed(1234)
     cluster.pm.fuzzycmeans <- e1071::cmeans(data_train_matrix, 1+i,iter.max = 100, m=m,  method="cmeans")$cluster
     cluster_assignment <- cluster.pm.fuzzycmeans
     strcor <- aggrStrata(strata[which(strata$DOM1==dom[DOM]),], nvar,
