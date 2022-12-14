@@ -37,25 +37,26 @@ parallelhEDA<-function(strata, cv,
                         .packages = c("hEDA","Rcpp2doParallel")#,.verbose = TRUE
   ) %dopar% {
 
-    nvar=length(grep("CV",names(cv[i,])))
+   nvar=length(grep("CV",names(cv[i,])))
     stra=strata[which(strata$DOM1==dom[i]),];err=cv[i,];
     suggestions =sugg[which(sugg$domainvalue==dom[i]),];
-    Temp=Temp;initialStrata=initialStrata[i]; decrement_constant=decrement_constant; end_time =end_time;
+    Temp=Temp;nStrat=initialStrata[i]; decrement_constant=decrement_constant; end_time =end_time;
     jsize=jsize;length_of_markov_chain =length_of_markov_chain;
     SAArun=SAArun;SAAiters=SAAiters;
     popSize = popSize ; iters = iters; mutationChance = mutationChance; elitism =elitism ;
-   addStrataFactor=addStrataFactor; EDAfreq=EDAfreq;
+    addStrataFactor=addStrataFactor; EDAfreq=EDAfreq;
     verbose = verbose; dominio=dom[i];minnumstrat=minnumstrat;kmax_percent=kmax_percent;ProbNewStratum=ProbNewStratum;
     strcens=strcens;writeFiles=writeFiles; showPlot=showPlot; minTemp = minTemp; realAllocation=realAllocation
     censiti <-0
-   hEDA(stra, err, suggestions ,
-     Temp,initialStrata, decrement_constant, end_time,
-     jsize,length_of_markov_chain,
-     SAArun,SAAiters,
-     popSize, iters, mutationChance, elitism,
-     addStrataFactor, EDAfreq,
-     verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
-     strcens,writeFiles, showPlot, minTemp, realAllocation)
+    hEDA(stra, err, suggestions ,
+         Temp,initialStrata=nStrat, decrement_constant, end_time,
+         jsize,length_of_markov_chain,
+         SAArun,SAAiters,
+         popSize, iters, mutationChance, elitism,
+         addStrataFactor, EDAfreq,
+         verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
+         strcens,writeFiles, showPlot, minTemp, realAllocation)
+
 
 
   }
