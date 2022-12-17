@@ -109,13 +109,14 @@ hEDA<-function (stra, err, suggestions =NULL,
 
       if(SAArun==TRUE && (iter %% SAAiters)==0){
 
-         tot<-min(evalVals)
+         #tot<-min(evalVals)
 
 
-         SolutionPopulation<-population
+         #SolutionPopulation<-population
 
-         reorderedPop<-SolutionPopulation[order(evalVals),]
-        solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
+         #reorderedPop<-SolutionPopulation[order(evalVals),]
+       # solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
+        solution<- reorderedPop[1,]
         sugg1<-suggestions
 
     for(ia in 1:elitismR){
@@ -200,7 +201,7 @@ hEDA<-function (stra, err, suggestions =NULL,
 
       bestEvals[iter] = min(evalVals)
       meanEvals[iter] = mean(evalVals)
-      plot(bestEvals,type="l")
+      #plot(bestEvals,type="l")
       SolutionPopulation<-population
 
       reorderedPop<-SolutionPopulation[order(evalVals),]
