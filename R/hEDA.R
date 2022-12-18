@@ -220,7 +220,7 @@ hEDA<-function (stra, err, suggestions =NULL,
             }
           }
         }
-        population<-reorderedPop
+
         evalVals = apply(population,1,evaluateRcppMem)
        #cat("Min evals ", min(evalVals),"\n")
         
@@ -252,5 +252,4 @@ hEDA<-function (stra, err, suggestions =NULL,
   return(result)
   
 }
-
 
