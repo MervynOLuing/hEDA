@@ -1,7 +1,7 @@
 #'hybrid Estimation of Distribution Algorithm (hEDA)
 #'@export
 hEDA<-function (stra, err, suggestions =NULL,
-                Temp=0.01,initialStrata, decrement_constant=0.95, end_time =140,
+                Temp=0.01,initialStr, decrement_constant=0.95, end_time =140,
                 jsize=10,length_of_markov_chain =5,
                 SAArun=TRUE,SAAiters=1000,
                 popSize = 200, iters = 100, mutationChance = NA, elitism = NA,
@@ -10,7 +10,7 @@ hEDA<-function (stra, err, suggestions =NULL,
                 strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
   
   stringMin <- rep(1, nrow(stra))
-  stringMax <- rep(initialStrata, nrow(stra))
+  stringMax <- rep(initialStr, nrow(stra))
   nvar<-length(grep("CV",names(err)))
   vars = nrow(stra)
   if (is.na(mutationChance)) {
@@ -131,18 +131,18 @@ hEDA<-function (stra, err, suggestions =NULL,
           sugg1$suggestions<-reorderedPop[ia,]
           res<-SAA(stra, err,
                    sugg1,
-                   Temp,initialStrata, decrement_constant, end_time,
+                   Temp,initialStrata=initialStr, decrement_constant, end_time,
                    showSettings, jsize,length_of_markov_chain,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
-         # cat("SAA sample size", res$best,"\n")
+           cat("SAA sample size", res$best,"\n")
           solution<-res$solution
           AllIters<-AllIters+res$solutions_generated
           reorderedPop[ia,]<-solution
         }
         population<-reorderedPop
         evalVals = apply(population,1,evaluateRcppMem)
-       # cat("Min evals ", min(evalVals),"\n")
+         cat("Min SAA evals ", min(evalVals),"\n")
         
         bestEvals[iter] = min(evalVals)
         meanEvals[iter] = mean(evalVals)
@@ -177,7 +177,7 @@ hEDA<-function (stra, err, suggestions =NULL,
         
         population<-reorderedPop
         evalVals = apply(population,1,evaluateRcppMem)
-       # cat("Min evals ", min(evalVals),"\n")
+        # cat("Min evals ", min(evalVals),"\n")
         
         bestEvals[iter] = min(evalVals)
         meanEvals[iter] = mean(evalVals)
@@ -220,9 +220,9 @@ hEDA<-function (stra, err, suggestions =NULL,
             }
           }
         }
-
+        
         evalVals = apply(population,1,evaluateRcppMem)
-       #cat("Min evals ", min(evalVals),"\n")
+        cat("Min evals ", min(evalVals),"\n")
         
         bestEvals[iter] = min(evalVals)
         meanEvals[iter] = mean(evalVals)
@@ -233,7 +233,7 @@ hEDA<-function (stra, err, suggestions =NULL,
         population<-reorderedPop
       }
       
-
+      
       
       
       #}
@@ -252,4 +252,3 @@ hEDA<-function (stra, err, suggestions =NULL,
   return(result)
   
 }
-
