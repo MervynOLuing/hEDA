@@ -1,10 +1,10 @@
 #'Simulated Annealing Algorithm (SAA)
 #'@export
 SAA<-function (strata, errors, suggestions = NULL,
-                         Temp=NA,initialStrata, decrement_constant=0.95, end_time =140,
-                         showSettings = FALSE, jsize=100,length_of_markov_chain =50,
-                         verbose = FALSE, dominio=NULL,minnumstrat=NULL,kmax_percent=0.025,ProbNewStratum=NA,
-                         strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.0005, realAllocation=TRUE)
+               Temp=NA,initialStrata, decrement_constant=0.95, end_time =140,
+               showSettings = FALSE, jsize=100,length_of_markov_chain =50,
+               verbose = FALSE, dominio=NULL,minnumstrat=NULL,kmax_percent=0.025,ProbNewStratum=NA,
+               strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.0005, realAllocation=TRUE)
 {
 
 
@@ -17,7 +17,7 @@ SAA<-function (strata, errors, suggestions = NULL,
   vars = length(stringMin)
 
   if (verbose)
-    {cat("Testing the sanity of parameters...\n")}
+  {cat("Testing the sanity of parameters...\n")}
   if (length(stringMin) != length(stringMax)) {
     stop("The vectors stringMin and stringMax must be of equal length.")
   }
@@ -56,8 +56,9 @@ SAA<-function (strata, errors, suggestions = NULL,
     censiti <- 0
     solution<-floor(solution)
     if( "matrix"%in%class(solution)){solution<-solution[1,]}
-    strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,
-                                 dominio=dominio)
+    strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,dominio=dominio)
+    #strcor <- aggrStrata(strata, nvar, solution, censiti,
+     #                    dominio=dominio)
 
     dimsamp <- nrow(strcor)
     if (strcens == TRUE)
@@ -70,9 +71,9 @@ SAA<-function (strata, errors, suggestions = NULL,
     alfa<- res[[2]]
     best_alfa<-alfa
     tot <- sum(soluz)
-
+    # cat("Original sample size", tot, "\n")
     best_tot<-tot
-    # best_sol<-solution
+    best_sol<-solution
     iters<-0
     bestIters<-NA
     x_axis <- NULL     # x axis
@@ -80,7 +81,7 @@ SAA<-function (strata, errors, suggestions = NULL,
     deltaList<-0
     j<-1
     k<-0
-
+    newtotVector<-NULL
     L_chain<-tot
     Prev_tot<-tot
     newTemp<-Temp
@@ -109,7 +110,7 @@ SAA<-function (strata, errors, suggestions = NULL,
 
 
         iters<-iters+1
-
+        #cat("iter   ",iters,"\n")
         newsolution<-solution
 
         groups<-unique(newsolution)
@@ -137,8 +138,10 @@ SAA<-function (strata, errors, suggestions = NULL,
         strataDelta<-rbind(strataReplace,strataOrig)
 
 
+       # strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+         #                        dominio=dominio)
         strcorDelta <-aggrStrata_RcppOpen(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
-                                          dominio=dominio)
+                                 dominio=dominio)
         strcorDelta <-as.data.frame(strcorDelta)
         newstrcor<-NULL
         newstrcor<-strcor[-which(strcor$STRATO %in% c(orig_group,replace_group)),]
@@ -149,18 +152,19 @@ SAA<-function (strata, errors, suggestions = NULL,
           strcor <- rbind(newstrcor, cens)
         dimens <- nrow(newstrcor)
         newstrcor<-as.data.frame(newstrcor)
-        if(round(res[[2]],2)[1]==1){alfa=c(rep(1/nvar, nvar))}
-        res<-second_bethel_alfa(newstrcor, errors,minnumstrat = 2, maxiter = 1000,
-                                maxiter1 = 250, alfa=alfa,realAllocation =realAllocation)
+        if(round(res[[2]],2)[1]>0.9){alfa=c(rep(1/nvar, nvar))}
+        if(round(res[[2]],2)[2]>0.9){alfa=c(rep(1/nvar, nvar))}
+        res<-second_bethel_alfa(newstrcor, errors,minnumstrat = 2, maxiter = 200,
+                                maxiter1 = 25, alfa=alfa,realAllocation =realAllocation)
         soluz <- res[[1]]
         alfa<-res[[2]]
 
-
-         newtot <- sum(soluz)
+        newtot <- sum(soluz)
 
 
 
         delta<- newtot - tot
+        newtotVector<-c(newtotVector,newtot)
 
 
 
@@ -168,6 +172,25 @@ SAA<-function (strata, errors, suggestions = NULL,
           solution<-newsolution
           tot<-newtot
           strcor<-newstrcor
+          #solutionPop[iters,]<-solution
+          # cat("Current best tot (updated) ", tot, "\n")
+          best_sol<-newsolution
+          best_tot<-tot
+          best_alfa<-alfa
+          #   outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
+          #                           dominio=dominio)
+          #
+          #   dimsamp <- nrow(outstrcor )
+          #   if (strcens == TRUE)
+          #     outstrcor  <- rbind(outstrcor , cens)
+          #   dimens <- nrow(outstrcor )
+          #   outstrcor <-as.data.frame(outstrcor )
+          #   res<-bethel_alfa(outstrcor , errors,minnumstrat = 2, maxiter = 20000,
+          #                    maxiter1 = 25, realAllocation = realAllocation)
+          #   soluz <- res[[1]]
+          #   cat("### check current value ", sum(soluz), "\n")
+          #   checktot<-sum(soluz)
+          # if (!all.equal(checktot,tot)) { stop() }
 
         }else if ((exp((-delta/(newTemp))) > runif(1))){
           deltaList <- c(deltaList, delta)
@@ -175,31 +198,22 @@ SAA<-function (strata, errors, suggestions = NULL,
           solution<-newsolution
           tot<-newtot
           strcor<-newstrcor
-
+          #solutionPop[iters,]<-solution
 
         }else{
           solution<-solution
           tot<-tot
           strcor<-strcor
+          # solutionPop[iters,]<-solution
           # cat("Else Tot ", tot, "\n")
         }
-        solutionPop[iters,]<-solution
 
 
+        y_axis <- c(y_axis, tot)
 
         x_axis <- c(x_axis, iters)
-        y_axis <- c(y_axis, tot)
+
         L_chain<-c(L_chain,tot)
-
-        if(tot==min(y_axis)){
-          best_tot<-tot
-        #  cat("Current best tot is ", best_tot, "\n")
-          best_sol<-solution
-          bestIters<-iters
-          best_alfa<-alfa
-
-
-        }
 
 
 
@@ -226,13 +240,28 @@ SAA<-function (strata, errors, suggestions = NULL,
   }
 
 
-  best_sol<-solutionPop[bestIters,]
-   if (verbose)
-   { cat(" done.\n")}
+  #best_sol<-solutionPop[bestIters,]
+
+  # outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
+  #                         dominio=dominio)
+  outstrcor <-  aggrStrata_RcppOpen(strata, nvar, best_sol, censiti,
+                      dominio=dominio)
+  dimsamp <- nrow(outstrcor )
+  if (strcens == TRUE)
+    outstrcor  <- rbind(outstrcor , cens)
+  dimens <- nrow(outstrcor )
+  outstrcor <-as.data.frame(outstrcor )
+  res<-bethel_alfa(outstrcor , errors,minnumstrat = 2, maxiter = 200,
+                   maxiter1 = 25, realAllocation = realAllocation)
+  soluz <- res[[1]]
+  #cat("final sol value is ", sum(soluz), "\n")
+
+  if (verbose)
+  { cat(" done.\n")}
 
   result = list(maxiterations= jsize, j_reached=j-1, solutions_generated =iters,
                 solution = best_sol,
-                best = best_tot,samplesize=y_axis, deltaList=deltaList,
+                best = sum(soluz),samplesize=y_axis, deltaList=deltaList,
                 Final_temperature=newTemp, best_alfa=best_alfa)
 
 

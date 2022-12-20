@@ -1,16 +1,16 @@
 #'hybrid Estimation of Distribution Algorithm (hEDA)
 #'@export
 hEDA<-function (stra, err, suggestions =NULL,
-                   Temp=0.01,initialStrata, decrement_constant=0.95, end_time =140,
-                  jsize=10,length_of_markov_chain =5,
-                   SAArun=TRUE,SAAiters=1000,
-                   popSize = 200, iters = 100, mutationChance = NA, elitism = NA,
-                   addStrataFactor=0.1, BOAfreq=BOAfreq,
-                   verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
-                   strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
+                Temp=0.01,initialStr, decrement_constant=0.95, end_time =140,
+                jsize=10,length_of_markov_chain =5,
+                SAArun=TRUE,SAAiters=1000,
+                popSize = 200, iters = 100, mutationChance = NA, elitism = NA,
+                addStrataFactor=0.1, EDAfreq=EDAfreq,
+                verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
+                strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
 
   stringMin <- rep(1, nrow(stra))
-  stringMax <- rep(initialStrata, nrow(stra))
+  stringMax <- rep(initialStr, nrow(stra))
   nvar<-length(grep("CV",names(err)))
   vars = nrow(stra)
   if (is.na(mutationChance)) {
@@ -23,7 +23,7 @@ hEDA<-function (stra, err, suggestions =NULL,
   }
   cv_values<-c(as.numeric(err[,2:(nvar+1)]))
   if (verbose)
-    {cat("Testing the sanity of parameters...\n")}
+  {cat("Testing the sanity of parameters...\n")}
   if (length(stringMin) != length(stringMax)) {
     stop("The vectors stringMin and stringMax must be of equal length.")
   }
@@ -41,7 +41,7 @@ hEDA<-function (stra, err, suggestions =NULL,
 
 
     newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
-                                  dominio)
+                       dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
                                   minnumstrat=minnumstrat,maxiter = 200, maxiter1 = 25,
@@ -74,7 +74,7 @@ hEDA<-function (stra, err, suggestions =NULL,
       }
     }    else {
       if (verbose)
-       { cat("Starting with random values in the given domains...\n")}
+      { cat("Starting with random values in the given domains...\n")}
       population = matrix(nrow = popSize, ncol = vars)
       for (var in 1:vars) {
         population[, var] = stringMin[var] + runif(popSize) *
@@ -83,8 +83,9 @@ hEDA<-function (stra, err, suggestions =NULL,
 
 
     }
-    bestEvals = rep(NA, iters)
-    meanEvals = rep(NA, iters)
+    # bestEvals = rep(NA, iters)
+    bestEvals<-NULL
+    meanEvals = NULL
     evalVals = rep(NA, popSize)
     Strata = rep(NA, popSize)
     popgrp<-list()
@@ -101,82 +102,113 @@ hEDA<-function (stra, err, suggestions =NULL,
 
     for (iter in 1:iters) {
       AllIters<-iter
-      if (verbose)
-        cat(paste("Starting iteration", iter, "\n"))
-      if (verbose)
-        cat("Calucating evaluation  values... ")
+      if (verbose==TRUE){
+        cat(paste("Starting iteration", iter, "\n"))}
+      if (verbose==TRUE){
+        cat("Calucating evaluation  values... ")}
 
+      population<-reorderedPop
+      evalVals = apply(population,1,evaluateRcppMem)
+      #  cat("Min evals ", min(evalVals),"\n")
+
+      bestEvals<- c(bestEvals,min(evalVals))
+      meanEvals[iter] = mean(evalVals)
+      #plot(bestEvals,type="l")
+      SolutionPopulation<-population
+
+      reorderedPop<-SolutionPopulation[order(evalVals),]
 
       if(SAArun==TRUE && (iter %% SAAiters)==0){
+        reorderedPop<- reorderedPop
+        #tot<-min(evalVals)
 
-         tot<-min(evalVals)
 
+        #SolutionPopulation<-population
 
-         SolutionPopulation<-population
-
-         reorderedPop<-SolutionPopulation[order(evalVals),]
-        solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
+        #reorderedPop<-SolutionPopulation[order(evalVals),]
+        # solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
+        solution<- reorderedPop[1,]
         sugg1<-suggestions
+        ia<-1
+        for(ia in 1:elitismR){
+          # cat("ia ", ia, "\n")
+          sugg1$suggestions<-reorderedPop[ia,]
+          # outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
+          #                         dominio=dominio)
+          #
+          # dimsamp <- nrow(outstrcor )
+          # if (strcens == TRUE)
+          #   outstrcor  <- rbind(outstrcor , cens)
+          # dimens <- nrow(outstrcor )
+          # outstrcor <-as.data.frame(outstrcor )
+          # res1<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
+          # soluz1 <- res1[[1]]
+          # cat("poptot test", sum(soluz1),"\n")
 
-    for(ia in 1:elitismR){
-      sugg1$suggestions<-reorderedPop[ia,]
-        res<-SAA(stra, err,
-            sugg1,
-          Temp,initialStrata, decrement_constant, end_time,
-          showSettings, jsize,length_of_markov_chain,
-          verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
-          strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
-
-        solution<-res$solution
-        AllIters<-AllIters+res$solutions_generated
-        reorderedPop[ia,]<-solution
-    }
-        population<-reorderedPop
-
-      }else if((iter %% BOAfreq)==0){
-
-              probsTable<-list()
-          elitePop<-reorderedPop[1:elitismR,]
-          if (class(elitePop)[1]=="numeric"){ nColumns<-length(elitePop)
-          for(ja in 1:nColumns){
-            probsTable[[ja]]<-table(elitePop)/sum(table(elitePop))
-          }
-          }else{nColumns<-ncol(elitePop)
-          for(jb in 1:nColumns){
-            probsTable[[jb]]<-table(elitePop[,jb])/sum(table(elitePop[,jb]))
-          }
-          }
-
-
-          for(ic in (elitismR+1):nrow(reorderedPop)){
-              #  for(ic in 2:nrow(population)){
-            for(jc in 1:ncol(reorderedPop)){
-              reorderedPop[ic,jc]<-as.numeric(names(probsTable[[jc]]))[sample(length(probsTable[[jc]])
-                                                                          ,1,prob=probsTable[[jc]])]
-            }
-          }
-
-          population<-reorderedPop
-
-
-          #}
-
+          res<-SAA(stra, err,
+                   sugg1,
+                   Temp,initialStrata=initialStr, decrement_constant, end_time,
+                   showSettings, jsize,length_of_markov_chain,
+                   verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
+                   strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
+          # cat("SAA sample size", res$best,"\n")
+          bestEvals<- c(bestEvals,min(res$best))
+          # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
+          #                         dominio=dominio)
+          #
+          # dimsamp <- nrow(outstrcor )
+          # if (strcens == TRUE)
+          #   outstrcor  <- rbind(outstrcor , cens)
+          # dimens <- nrow(outstrcor )
+          # outstrcor <-as.data.frame(outstrcor )
+          # res2<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
+          # soluz2 <- res2[[1]]
+          # cat("Res test", sum(soluz2),"\n")
+          solution<-res$solution
+          AllIters<-AllIters+res$solutions_generated
+          reorderedPop[ia,]<-solution
         }
 
 
-      population<-population
+      }else if((iter %% EDAfreq)==0){
 
+        probsTable<-list()
+        elitePop<-reorderedPop[1:elitismR,]
+        if (class(elitePop)[1]=="numeric"){ nColumns<-length(elitePop)
+        for(ja in 1:nColumns){
+          probsTable[[ja]]<-table(elitePop)/sum(table(elitePop))
+        }
+        }else{nColumns<-ncol(elitePop)
+        for(jb in 1:nColumns){
+          probsTable[[jb]]<-table(elitePop[,jb])/sum(table(elitePop[,jb]))
+        }
+        }
+
+
+        for(ic in (elitismR+1):nrow(reorderedPop)){
+          #  for(ic in 2:nrow(population)){
+          for(jc in 1:ncol(reorderedPop)){
+            reorderedPop[ic,jc]<-as.numeric(names(probsTable[[jc]]))[sample(length(probsTable[[jc]])
+                                                                            ,1,prob=probsTable[[jc]])]
+          }
+        }
+
+
+
+        #}
+
+      }
 
       if (mutationChance > 0) {
         #                    if (verbose) cat("  applying mutations... ");
-       # cat("  applying mutations... ");
+        # cat("  applying mutations... ");
         mutationCount = 0;
         for (object in (elitismR+1):popSize) { # don't mutate the best
           for (var in 1:vars) {
             if (runif(1) < mutationChance) { # ok, do mutation
-              genoma <- as.factor(population[object,])
+              genoma <- as.factor(reorderedPop[object,])
               levels(genoma) <- c(1:length(levels(genoma)))
-              population[object,] <- genoma
+              reorderedPop[object,] <- genoma
               if (runif(1) <= (1-addStrataFactor)) {
                 mutation <- as.numeric(sample(levels(genoma),1))
               }
@@ -186,24 +218,15 @@ hEDA<-function (stra, err, suggestions =NULL,
 
               # apply mutation, and delete known evalutation value
               #&n bsp;
-              population[object,var] = mutation;
+              reorderedPop[object,var] = mutation;
               Strata[object] = NA;
               mutationCount = mutationCount + 1;
             }
           }
         }
 
+
       }
-
-      evalVals = apply(population,1,evaluateRcppMem)
-      # cat("Min evals ", min(evalVals),"\n")
-
-      bestEvals[iter] = min(evalVals)
-      meanEvals[iter] = mean(evalVals)
-      plot(bestEvals,type="l")
-      SolutionPopulation<-population
-
-      reorderedPop<-SolutionPopulation[order(evalVals),]
 
 
       #}
@@ -212,6 +235,7 @@ hEDA<-function (stra, err, suggestions =NULL,
     }
 
   }
+  evalVals = apply(population,1,evaluateRcppMem)
   result = list(stringMin = stringMin,
                 stringMax = stringMax, popSize = popSize, iters = iters,
                 suggestions = suggestions, population = population, elitism = elitismR,
