@@ -40,7 +40,7 @@ hEDA<-function (stra, err, suggestions =NULL,
   evaluateRcpp<-function(sugg){
 
 
-    newstr<-aggrStrata(stra, nvar, sugg, censiti,
+    newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
                        dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
@@ -83,7 +83,7 @@ hEDA<-function (stra, err, suggestions =NULL,
 
 
     }
-   # bestEvals = rep(NA, iters)
+    # bestEvals = rep(NA, iters)
     bestEvals<-NULL
     meanEvals = NULL
     evalVals = rep(NA, popSize)
@@ -109,7 +109,7 @@ hEDA<-function (stra, err, suggestions =NULL,
 
       population<-reorderedPop
       evalVals = apply(population,1,evaluateRcppMem)
-     #  cat("Min evals ", min(evalVals),"\n")
+      #  cat("Min evals ", min(evalVals),"\n")
 
       bestEvals<- c(bestEvals,min(evalVals))
       meanEvals[iter] = mean(evalVals)
@@ -131,11 +131,11 @@ hEDA<-function (stra, err, suggestions =NULL,
         sugg1<-suggestions
         ia<-1
         for(ia in 1:elitismR){
-         # cat("ia ", ia, "\n")
+          # cat("ia ", ia, "\n")
           sugg1$suggestions<-reorderedPop[ia,]
           # outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
           #                         dominio=dominio)
-          # 
+          #
           # dimsamp <- nrow(outstrcor )
           # if (strcens == TRUE)
           #   outstrcor  <- rbind(outstrcor , cens)
@@ -152,18 +152,18 @@ hEDA<-function (stra, err, suggestions =NULL,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
           # cat("SAA sample size", res$best,"\n")
-           bestEvals<- c(bestEvals,min(res$best))
-           # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
-           #                         dominio=dominio)
-           #
-           # dimsamp <- nrow(outstrcor )
-           # if (strcens == TRUE)
-           #   outstrcor  <- rbind(outstrcor , cens)
-           # dimens <- nrow(outstrcor )
-           # outstrcor <-as.data.frame(outstrcor )
-           # res2<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
-           # soluz2 <- res2[[1]]
-           # cat("Res test", sum(soluz2),"\n")
+          bestEvals<- c(bestEvals,min(res$best))
+          # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
+          #                         dominio=dominio)
+          #
+          # dimsamp <- nrow(outstrcor )
+          # if (strcens == TRUE)
+          #   outstrcor  <- rbind(outstrcor , cens)
+          # dimens <- nrow(outstrcor )
+          # outstrcor <-as.data.frame(outstrcor )
+          # res2<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
+          # soluz2 <- res2[[1]]
+          # cat("Res test", sum(soluz2),"\n")
           solution<-res$solution
           AllIters<-AllIters+res$solutions_generated
           reorderedPop[ia,]<-solution
