@@ -50,7 +50,7 @@ parallelhEDA<-function(strata, cv,
     strcens=strcens;writeFiles=writeFiles; showPlot=showPlot; minTemp = minTemp; realAllocation=realAllocation
     censiti <-0
     hEDA(stra, err, suggestions ,
-         Temp,initialStrata=nStrat, decrement_constant, end_time,
+         Temp,initialStr=nStrat, decrement_constant, end_time,
          jsize,length_of_markov_chain,
          SAArun,SAAiters,
          popSize, iters, mutationChance, elitism,
