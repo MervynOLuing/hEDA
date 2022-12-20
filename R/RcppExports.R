@@ -2,10 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 Rcpp_sortDelta <- function(x) {
-    .Call('_hEDA_Rcpp_sortDelta', PACKAGE = 'hEDA', x)
+    .Call(`_hEDA_Rcpp_sortDelta`, x)
 }
 
 aggrStrata_RcppOpen <- function(strata, nvar, vett, censiti, dominio) {
-    .Call('_hEDA_aggrStrata_RcppOpen', PACKAGE = 'hEDA', strata, nvar, vett, censiti, dominio)
+    .Call(`_hEDA_aggrStrata_RcppOpen`, strata, nvar, vett, censiti, dominio)
 }
 

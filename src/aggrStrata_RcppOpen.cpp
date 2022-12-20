@@ -1,3 +1,10 @@
+// Translation of R code from: G. Barcaroli, M. Ballin, H. Odendaal, D. Pagliuca, E. Willighagen, D. Zardetto (2020). SamplingStrata:
+//   Optimal Stratification of Sampling Frames for Multipurpose Sampling Surveys. R package version 1.5-2 URL
+// https://CRAN.R-project.org/package=SamplingStrata
+//
+// Giulio Barcaroli (2014). SamplingStrata: An R Package for the Optimization of Stratified Sampling.
+// Journal of Statistical Software, 61(4), 1-24. URL http://www.jstatsoft.org/v61/i04/. doi// 10.18637/jss.v061.i04
+
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 //using namespace sugar;
