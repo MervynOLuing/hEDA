@@ -71,9 +71,9 @@ SAA<-function (strata, errors, suggestions = NULL,
     alfa<- res[[2]]
     best_alfa<-alfa
     tot <- sum(soluz)
-
+   # cat("Original sample size", tot, "\n")
     best_tot<-tot
-    # best_sol<-solution
+    best_sol<-solution
     iters<-0
     bestIters<-NA
     x_axis <- NULL     # x axis
