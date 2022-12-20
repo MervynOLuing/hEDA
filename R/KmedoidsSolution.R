@@ -75,12 +75,13 @@ kmedoidsSolution<- function(strata,
                                    stringsAsFactors = TRUE)
   solutionKmedoid$domainvalue <- as.integer(solutionKmedoid$domainvalue)
   cat("\n-----------------\n")
-  cat("\n Kmeans solution ")
+  cat("\n Kmedoids solution ")
   cat("\n-----------------")
   for (i in c(1:ndom)) {
     cat("\n *** Domain: ", i, " ***")
     cat("\n Number of strata: ", best_num_strata[i])
     cat("\n Sample size     : ", best[i])
   }
+  cat("\n Total Sample size     : ", sum(best))
  return(solutionKmedoid)
 }

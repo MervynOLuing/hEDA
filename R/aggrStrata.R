@@ -5,11 +5,13 @@
 # Giulio Barcaroli (2014). SamplingStrata: An R Package for the Optimization of Stratified Sampling.
 # Journal of Statistical Software, 61(4), 1-24. URL http://www.jstatsoft.org/v61/i04/. doi
 # 10.18637/jss.v061.i04
+#'aggrStrata
+#'@export 
 aggrStrata <- function(strata, nvar, vett, censiti, dominio) {
   strata <- cbind(strata, vett)
   varloop <- c(1:nvar)
   N <- strata$N
-  CN <- strata$COST * strata$N
+  CN <- strata$COST * strata$N 
   string2 <- ""
   string3 <- ""
   string5 <- ""
