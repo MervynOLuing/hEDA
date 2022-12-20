@@ -56,9 +56,9 @@ SAA<-function (strata, errors, suggestions = NULL,
     censiti <- 0
     solution<-floor(solution)
     if( "matrix"%in%class(solution)){solution<-solution[1,]}
-    #strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,
-    strcor <- aggrStrata(strata, nvar, solution, censiti,
-                         dominio=dominio)
+    strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,dominio=dominio)
+    #strcor <- aggrStrata(strata, nvar, solution, censiti,
+     #                    dominio=dominio)
 
     dimsamp <- nrow(strcor)
     if (strcens == TRUE)
@@ -71,7 +71,7 @@ SAA<-function (strata, errors, suggestions = NULL,
     alfa<- res[[2]]
     best_alfa<-alfa
     tot <- sum(soluz)
-   # cat("Original sample size", tot, "\n")
+    # cat("Original sample size", tot, "\n")
     best_tot<-tot
     best_sol<-solution
     iters<-0
@@ -138,7 +138,9 @@ SAA<-function (strata, errors, suggestions = NULL,
         strataDelta<-rbind(strataReplace,strataOrig)
 
 
-        strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+       # strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+         #                        dominio=dominio)
+        strcorDelta <-aggrStrata_RcppOpen(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
                                  dominio=dominio)
         strcorDelta <-as.data.frame(strcorDelta)
         newstrcor<-NULL
@@ -171,24 +173,24 @@ SAA<-function (strata, errors, suggestions = NULL,
           tot<-newtot
           strcor<-newstrcor
           #solutionPop[iters,]<-solution
-         # cat("Current best tot (updated) ", tot, "\n")
+          # cat("Current best tot (updated) ", tot, "\n")
           best_sol<-newsolution
           best_tot<-tot
           best_alfa<-alfa
-        #   outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
-        #                           dominio=dominio)
-        #
-        #   dimsamp <- nrow(outstrcor )
-        #   if (strcens == TRUE)
-        #     outstrcor  <- rbind(outstrcor , cens)
-        #   dimens <- nrow(outstrcor )
-        #   outstrcor <-as.data.frame(outstrcor )
-        #   res<-bethel_alfa(outstrcor , errors,minnumstrat = 2, maxiter = 20000,
-        #                    maxiter1 = 25, realAllocation = realAllocation)
-        #   soluz <- res[[1]]
-        #   cat("### check current value ", sum(soluz), "\n")
-        #   checktot<-sum(soluz)
-        # if (!all.equal(checktot,tot)) { stop() }
+          #   outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
+          #                           dominio=dominio)
+          #
+          #   dimsamp <- nrow(outstrcor )
+          #   if (strcens == TRUE)
+          #     outstrcor  <- rbind(outstrcor , cens)
+          #   dimens <- nrow(outstrcor )
+          #   outstrcor <-as.data.frame(outstrcor )
+          #   res<-bethel_alfa(outstrcor , errors,minnumstrat = 2, maxiter = 20000,
+          #                    maxiter1 = 25, realAllocation = realAllocation)
+          #   soluz <- res[[1]]
+          #   cat("### check current value ", sum(soluz), "\n")
+          #   checktot<-sum(soluz)
+          # if (!all.equal(checktot,tot)) { stop() }
 
         }else if ((exp((-delta/(newTemp))) > runif(1))){
           deltaList <- c(deltaList, delta)
@@ -202,7 +204,7 @@ SAA<-function (strata, errors, suggestions = NULL,
           solution<-solution
           tot<-tot
           strcor<-strcor
-         # solutionPop[iters,]<-solution
+          # solutionPop[iters,]<-solution
           # cat("Else Tot ", tot, "\n")
         }
 
@@ -240,9 +242,10 @@ SAA<-function (strata, errors, suggestions = NULL,
 
   #best_sol<-solutionPop[bestIters,]
 
-  outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
-                          dominio=dominio)
-
+  # outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
+  #                         dominio=dominio)
+  outstrcor <-  aggrStrata_RcppOpen(strata, nvar, best_sol, censiti,
+                      dominio=dominio)
   dimsamp <- nrow(outstrcor )
   if (strcens == TRUE)
     outstrcor  <- rbind(outstrcor , cens)
