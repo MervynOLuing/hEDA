@@ -109,7 +109,7 @@ hEDA<-function (stra, err, suggestions =NULL,
 
       population<-reorderedPop
       evalVals = apply(population,1,evaluateRcppMem)
-       cat("Min evals ", min(evalVals),"\n")
+     #  cat("Min evals ", min(evalVals),"\n")
 
       bestEvals<- c(bestEvals,min(evalVals))
       meanEvals[iter] = mean(evalVals)
@@ -133,17 +133,17 @@ hEDA<-function (stra, err, suggestions =NULL,
         for(ia in 1:elitismR){
          # cat("ia ", ia, "\n")
           sugg1$suggestions<-reorderedPop[ia,]
-          outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
-                                  dominio=dominio)
-
-          dimsamp <- nrow(outstrcor )
-          if (strcens == TRUE)
-            outstrcor  <- rbind(outstrcor , cens)
-          dimens <- nrow(outstrcor )
-          outstrcor <-as.data.frame(outstrcor )
-          res1<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
-          soluz1 <- res1[[1]]
-          cat("poptot test", sum(soluz1),"\n")
+          # outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
+          #                         dominio=dominio)
+          # 
+          # dimsamp <- nrow(outstrcor )
+          # if (strcens == TRUE)
+          #   outstrcor  <- rbind(outstrcor , cens)
+          # dimens <- nrow(outstrcor )
+          # outstrcor <-as.data.frame(outstrcor )
+          # res1<-bethel_alfa(outstrcor , errors,realAllocation = realAllocation)
+          # soluz1 <- res1[[1]]
+          # cat("poptot test", sum(soluz1),"\n")
 
           res<-SAA(stra, err,
                    sugg1,
@@ -151,7 +151,7 @@ hEDA<-function (stra, err, suggestions =NULL,
                    showSettings, jsize,length_of_markov_chain,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
-           cat("SAA sample size", res$best,"\n")
+          # cat("SAA sample size", res$best,"\n")
            bestEvals<- c(bestEvals,min(res$best))
            # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
            #                         dominio=dominio)
