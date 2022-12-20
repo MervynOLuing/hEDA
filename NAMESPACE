@@ -3,6 +3,7 @@
 export(KmeansSolution)
 export(KmeansSolution3)
 export(SAA)
+export(aggrStrata)
 export(fuzzySolution)
 export(hEDA)
 export(kmedoidsSolution)

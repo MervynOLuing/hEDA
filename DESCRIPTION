@@ -8,6 +8,6 @@ Maintainer: Mervyn OLuing <mervyn.oluing@cso.ie>
 Description: This package contains a hybrid estimation of distribution algorithm (hEDA) to solve the joint stratification and sample allocation problem. EDAs are stochastic blackbox optimization algorithms which can be used to estimate, build and sample probability models in the search for an optimal stratification. We enhance the exploitation properties of the EDA by adding a simulated annealing algorithm to make it a hybrid EDA. Results of empirical comparisons for atomic and continuous strata show that the HEDA attains the best results found so far, when compared to benchmark tests on the same data using a grouping genetic algorithm, simulated annealing or hill-climbing. The R package hEDA presents this algorithm for use in joint stratification and sample allocation designs, enabling comparison with existing algorithmic approaches.
 License: GPL (>= 2) https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 Encoding: UTF-8
-LinkingTo: SamplingStrata
+LinkingTo: SamplingStrata, Rcpp, RcppArmadillo 
 LazyData: true
 RoxygenNote: 7.2.2
