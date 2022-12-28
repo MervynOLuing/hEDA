@@ -9,7 +9,7 @@ parallelhEDAContinuous<-function(frame, cv,
                                  addStrataFactor=0.000001, EDAfreq=1,
                                  verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
                                  strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
-  
+
   if (writeFiles == TRUE) {
     dire <- getwd()
     direnew <- paste(dire, "/output", sep = "")
@@ -29,21 +29,21 @@ parallelhEDAContinuous<-function(frame, cv,
   if (ndom < cores) {cores <-ndom}
   cl <- parallel::makeCluster(cores)
   # Activate cluster for foreach library
-  
+
   doParallel::registerDoParallel(cl)
-  
+
   #ptm <- proc.time()
   r <- foreach::foreach(i = 1:ndom,
                         .combine = rbind,
                         #.packages = c("hEDA")
                         .packages = c("hEDA","Rcpp2doParallel","SamplingStrata")#,.verbose = TRUE
   ) %dopar% {
-    
+
 
     if (!is.null(sugg)){
       suggestions =sugg[which(sugg$domainvalue==dom[i]),];
     }else {suggestions<-NULL}
-    
+
     nvar=length(grep("CV",names(cv[i,])))
     fr=frame[which(frame$domainvalue==dom[i]),];err=cv[i,];
     Temp=Temp;nStrat=initialStrata[i]; decrement_constant=decrement_constant; end_time =end_time;
@@ -62,84 +62,84 @@ parallelhEDAContinuous<-function(frame, cv,
                    addStrataFactor, EDAfreq,
                    verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot, minTemp, realAllocation)
-    
-    
-    
+
+
+
   }
   #  time_foreach[3]
   # Stop cluster to free up resources
   parallel::stopCluster(cl)
   #  proc.time() - ptm
   #thanks to: https://towardsdatascience.com/getting-started-with-parallel-programming-in-r-d5f801d43745
-  
+
   #  proc.time() - ptm
-  
+
   if(showPlot==TRUE){
-    
-    
+
+
     for (i in 1:ndom){
       plot(unlist(r[i,]$samplesizes),type="l",xlab="Steps",ylab="Sample Size")
-      
+
       title(paste("Domain #", dom[i], " - Sample cost",
-                  
+
                   round(min(unlist(r[i,]$best)), 2)),
-            
+
             col.main = "red")
     }
-    
+
   }
-  
+
   if (writeFiles == TRUE) {
-    
+
     if(ndom==1){
-      
+
       stmt <- paste("png(filename = file.path(direnew, 'plotdom", 1, ".png'),height=5, width=7, units='in', res=144)", sep = "")
-      
+
       eval(parse(text = stmt))
-      
-      
-      
+
+
+
       plot(unlist(r[1,]$samplesizes),type="l",xlab="Number of Solutions",ylab="Sample Size")
-      
+
       title(paste("Domain #", i, " - Sample cost",
-                  
+
                   round(min(unlist(r[1,]$best)), 2)),
-            
+
             col.main = "red")
-      
+
       if (writeFiles == TRUE)  dev.off()
-      
-      
-      
+
+
+
     }else{
-      
+
       for (i in 1:ndom){
-        
-        
+
+
         stmt <- paste("png(filename = file.path(direnew, 'plotdom", i, ".png'),height=5, width=7, units='in', res=144)", sep = "")
-        
+
         eval(parse(text = stmt))
-        
+
         plot(unlist(r[i,]$samplesizes),type="l",xlab="Steps",ylab="Sample Size")
-        
+
         title(paste("Domain #", i, " - Sample cost",
-                    
+
                     round(min(unlist(r[i,]$best)), 2)),
               col.main = "red")
-        
+
         if (writeFiles == TRUE)  dev.off()
-        
+
       }
     }
-    
-    
+
+
   }
-  
+
   # colnames(r)
   # [1] "stringMin"       "stringMax"       "popSize"         "iters"           "suggestions"     "population"
   # [7] "elitism"         "mutationChance"  "evaluations"     "best"            "samplesizes"     "mean"
   # [13] "TotalIterations"
   result = list( popSize=r[,3], population=r[,6],samplesizes=r[,11],steps=r[,4],suggestions=r[,5], SampleSize=r[,10])
-  
+
   return(result)
 }
