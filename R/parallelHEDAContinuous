@@ -1,4 +1,4 @@
-#'parallelhEDA
+#'parallelhEDAContinuous
 #'@export
 parallelhEDAContinuous<-function(frame, cv,
                        sugg,
