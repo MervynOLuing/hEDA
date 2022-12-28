@@ -56,9 +56,9 @@ SAA<-function (strata, errors, suggestions = NULL,
     censiti <- 0
     solution<-floor(solution)
     if( "matrix"%in%class(solution)){solution<-solution[1,]}
-    strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,dominio=dominio)
-    #strcor <- aggrStrata(strata, nvar, solution, censiti,
-     #                    dominio=dominio)
+    #strcor <- aggrStrata_RcppOpen(strata, nvar, solution, censiti,dominio=dominio)
+    strcor <- aggrStrata(strata, nvar, solution, censiti,
+                         dominio=dominio)
 
     dimsamp <- nrow(strcor)
     if (strcens == TRUE)
@@ -138,10 +138,10 @@ SAA<-function (strata, errors, suggestions = NULL,
         strataDelta<-rbind(strataReplace,strataOrig)
 
 
-       # strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
-         #                        dominio=dominio)
-        strcorDelta <-aggrStrata_RcppOpen(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
-                                 dominio=dominio)
+        strcorDelta <-aggrStrata(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+                                dominio=dominio)
+       # strcorDelta <-aggrStrata_RcppOpen(strataDelta, nvar=nvar,strataDelta$newsolution, censiti=censiti,
+        #                         dominio=dominio)
         strcorDelta <-as.data.frame(strcorDelta)
         newstrcor<-NULL
         newstrcor<-strcor[-which(strcor$STRATO %in% c(orig_group,replace_group)),]
@@ -242,10 +242,10 @@ SAA<-function (strata, errors, suggestions = NULL,
 
   #best_sol<-solutionPop[bestIters,]
 
-  # outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
-  #                         dominio=dominio)
-  outstrcor <-  aggrStrata_RcppOpen(strata, nvar, best_sol, censiti,
-                      dominio=dominio)
+   outstrcor <- aggrStrata(strata, nvar, best_sol, censiti,
+                           dominio=dominio)
+  #outstrcor <-  aggrStrata_RcppOpen(strata, nvar, best_sol, censiti,
+   #                   dominio=dominio)
   dimsamp <- nrow(outstrcor )
   if (strcens == TRUE)
     outstrcor  <- rbind(outstrcor , cens)
