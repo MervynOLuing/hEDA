@@ -144,13 +144,13 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
     reorderedPop<-SolutionPopulation[order(evalVals),]
 
-    for (iter in 1:iters) {
-      AllIters<-iter
+    for (it in 1:iters) {
+      Alliters<-it
       if (verbose==TRUE){
-        cat(paste("Starting iteration", iter, "\n"))}
+        cat(paste("Starting iteration", it, "\n"))}
 
 
-      if(SAArun==TRUE && (iter %% SAAiters)==0){
+      if(SAArun==TRUE && (it %% SAAiters)==0){
         reorderedPop<- reorderedPop
         #tot<-min(evalVals)
 
@@ -204,7 +204,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         }
 
 
-      }else if((iter %% EDAfreq)==0){
+      }else if((it %% EDAfreq)==0){
 
         probsTable<-list()
         elitePop<-reorderedPop[1:elitismR,]
@@ -270,7 +270,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       # cat("Min evals ", min(evalVals),"\n")
 
       bestEvals<- c(bestEvals,min(evalVals))
-      meanEvals[iter] = mean(evalVals)
+      meanEvals[it] = mean(evalVals)
       #plot(bestEvals,type="l")
       SolutionPopulation<-population
 
