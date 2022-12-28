@@ -23,7 +23,7 @@ parallelhEDAContinuous<-function(frame, cv,
   require("doParallel")
   require("SamplingStrata")
   #thanks to: https://towardsdatascience.com/getting-started-with-parallel-programming-in-r-d5f801d43745
-  dom<-unique(frame$domainvalue)
+  dom<-sort(unique(frame$domainvalue))
   ndom<-length(dom)
   cores<-(detectCores())-1
   if (ndom < cores) {cores <-ndom}
