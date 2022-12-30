@@ -162,7 +162,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         solution<- reorderedPop[1,]
         sugg1<-suggestions
         ia<-1
-        resSample<-NULL
+        #resSample<-NULL
         #for(ia in 1:elitismR){
           # cat("ia ", ia, "\n")
           #sugg1$suggestions<-reorderedPop[ia,]
@@ -186,8 +186,8 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
           # cat("SAA sample size", res$best,"\n")
-          resSample<-c(resSample,res$best)
-          bestEvals<- c(bestEvals,min(resSample))
+         # resSample<-c(resSample,res$best)
+         # bestEvals<- c(bestEvals,min(resSample))
           # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
           #                         dominio=dominio)
           #
