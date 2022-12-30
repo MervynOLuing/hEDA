@@ -163,9 +163,10 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         sugg1<-suggestions
         ia<-1
         resSample<-NULL
-        for(ia in 1:elitismR){
+        #for(ia in 1:elitismR){
           # cat("ia ", ia, "\n")
-          sugg1$suggestions<-reorderedPop[ia,]
+          #sugg1$suggestions<-reorderedPop[ia,]
+        sugg1$suggestions<-reorderedPop[1,]
           # outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
           #                         dominio=dominio)
           #
@@ -200,8 +201,9 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           # cat("Res test", sum(soluz2),"\n")
           solution<-res$solution
           AllIters<-AllIters+res$solutions_generated
-          reorderedPop[ia,]<-solution
-        }
+          #reorderedPop[ia,]<-solution
+        reorderedPop[1,]<-solution
+        #}
 
 
       }else if((it %% EDAfreq)==0){
