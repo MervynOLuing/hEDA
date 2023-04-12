@@ -1,6 +1,6 @@
 #'hybrid Estimation of Distribution Algorithm (hEDA) for continuous strata
 #'@export
-newhEDAContinuous<-function (frame, err, suggestions =NULL,
+hEDAContinuous<-function (frame, err, suggestions =NULL,
                           Temp=0.01,initialStr, decrement_constant=0.95, end_time =140,
                           jsize=10,length_of_markov_chain =5,
                           SAArun=TRUE,SAAiters=1000,
