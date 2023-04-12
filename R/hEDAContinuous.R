@@ -223,7 +223,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
           # cat("SAA sample size", res$best,"\n")
-          resSample<-c(resSample,res$best)
+         # resSample<-c(resSample,res$best)
           bestEvals<- c(bestEvals,res$best)
           # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
           #                         dominio=dominio)
