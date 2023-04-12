@@ -102,6 +102,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           eval(parse(text=paste("fr$ZZ",i,"<- fr$X",i,sep="")))
         }
         v<-pop[object,]
+        string<-pop[object,]
         for(j in 1:nX){
           ini=(j-1)*(NROW(v)/nX)+1
           fin=j*(NROW(v)/nX)
