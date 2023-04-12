@@ -46,7 +46,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   model=NULL
 
   
-  frame<-dataset
+  dataset<-frame
   
   evaluateRcpp<-function(sugg){
     
