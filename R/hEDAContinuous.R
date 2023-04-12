@@ -1,6 +1,6 @@
 #'hybrid Estimation of Distribution Algorithm (hEDA) for continuous strata
 #'@export
-hEDAContinuous<-function (frame, err, suggestions =NULL,
+newhEDAContinuous<-function (frame, err, suggestions =NULL,
                           Temp=0.01,initialStr, decrement_constant=0.95, end_time =140,
                           jsize=10,length_of_markov_chain =5,
                           SAArun=TRUE,SAAiters=1000,
@@ -43,18 +43,24 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
     stop("The population size must be greater than the elitism.")
   }
   nvar<-length(grep("CV",names(err)))
-  evaluateRcpp<-function(sugg){
+  model=NULL
 
-    newstr<-aggrStrata(stra, nvar, sugg, censiti,
-                       dominio)
+  
+  frame<-dataset
+  
+  evaluateRcpp<-function(sugg){
+    
+    
+    newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
+                                dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
                                   minnumstrat=minnumstrat,maxiter = 200, maxiter1 = 25,
                                   realAllocation=realAllocation)[1]))
+    
     return(res)
   }
   evaluateRcppMem <- memoise::memoise(evaluateRcpp)
-
 
   censiti<-0
 
@@ -85,17 +91,17 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         pop[,var] = stringMin[var] +
           runif(popSize)*(stringMax[var]-stringMin[var]);
       }
-      population = matrix(nrow = popSize, ncol = nvars)
       i<-0
-      for (p in 1:popSize) {
-        dataset<-frame
-        fr <- stra
+      population<-matrix(nrow = popSize, ncol = nrow(frame))
+      
+      dataset<-frame
+      fr<-frame
+      for (object in 1:popSize) {
         nX <- sum(grepl("X",colnames(fr)))
         for(i in 1:nX){
           eval(parse(text=paste("fr$ZZ",i,"<- fr$X",i,sep="")))
         }
-        string<-pop[p,]
-        v<-pop[p,]
+        v<-pop[object,]
         for(j in 1:nX){
           ini=(j-1)*(NROW(v)/nX)+1
           fin=j*(NROW(v)/nX)
@@ -106,15 +112,13 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
           eval(parse(text=paste("fr$X",j," <- NULL",sep="")))
         }
-
+        
         for(i in 1:(ncuts+1)) {
           eval(parse(text=paste("fr$c",i,"<-0",sep="")))
           for(j in 1:nX) {
             eval(parse(text=paste("fr$c",i,"<-ifelse((fr$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr$c",i,")",sep="")))
-          }
+          }  
         }
-
-
         fr$X1=apply(fr[,c((ncol(fr)-ncuts):ncol(fr))],1,max)
         fr$X1 <- as.factor(fr$X1)
         if (max(levels(fr$X1)) > length(levels(fr$X1))) {
@@ -123,10 +127,11 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           fr$X1 <- as.numeric(fr$X1)
         }
         fr$X1 <- as.numeric(fr$X1)
-        population[p,]<-fr$X1
+        population[object,]<-fr$X1
       }
-
+      
     }
+    frame<-dataset
     # bestEvals = rep(NA, iters)
     bestEvals<-NULL
     meanEvals = NULL
@@ -138,19 +143,52 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
     # elitism= floor(popSize/5)
     minnumstr=minnumstrat
 
-    evalVals = apply(population,1,evaluateRcppMem)
 
+    for (object in 1:popSize) {
+      if (is.na(evalVals[object])) {
+        #---- Modification:
+        res <- evaluateRcppMem(population[object,])
+        evalVals[object] = res
+        #---- End modification:
+        if (verbose) cat(".");
+      }
+    }
+    # cat("Min evals ", min(evalVals),"\n")
+
+    bestEvals<- c(bestEvals,min(evalVals))
+
+    #plot(bestEvals,type="l")
     SolutionPopulation<-population
 
     reorderedPop<-SolutionPopulation[order(evalVals),]
+
+
 
     for (it in 1:iters) {
       Alliters<-it
       if (verbose==TRUE){
         cat(paste("Starting iteration", it, "\n"))}
-
+      population<-reorderedPop
+      for (object in 1:popSize) {
+        #---- Modification:
+        res <- evaluateRcppMem(population[object,])
+        evalVals[object] = res
+        #---- End modification:
+        if (verbose) cat(".");
+      }
+      # cat("Min evals ", min(evalVals),"\n")
+      
+      bestEvals<- c(bestEvals,min(evalVals))
+      meanEvals[it] = mean(evalVals)
+      plot(bestEvals,type="l")
+      SolutionPopulation<-population
+      
+      reorderedPop<-SolutionPopulation[order(evalVals),]
+      
+      meanEvals[it] = mean(evalVals)
 
       if(SAArun==TRUE && (it %% SAAiters)==0){
+
         reorderedPop<- reorderedPop
         #tot<-min(evalVals)
 
@@ -161,12 +199,10 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         # solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
         solution<- reorderedPop[1,]
         sugg1<-suggestions
-        ia<-1
-        #resSample<-NULL
-        #for(ia in 1:elitismR){
+       
+
           # cat("ia ", ia, "\n")
-          #sugg1$suggestions<-reorderedPop[ia,]
-        sugg1$suggestions<-reorderedPop[1,]
+          sugg1$suggestions<- solution
           # outstrcor <- aggrStrata(stra, nvar,sugg1$suggestions, censiti,
           #                         dominio=dominio)
           #
@@ -186,8 +222,8 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
           # cat("SAA sample size", res$best,"\n")
-         # resSample<-c(resSample,res$best)
-         # bestEvals<- c(bestEvals,min(resSample))
+          resSample<-c(resSample,res$best)
+          bestEvals<- c(bestEvals,res$best)
           # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
           #                         dominio=dominio)
           #
@@ -201,14 +237,21 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           # cat("Res test", sum(soluz2),"\n")
           solution<-res$solution
           AllIters<-AllIters+res$solutions_generated
-          #reorderedPop[ia,]<-solution
-        reorderedPop[1,]<-solution
-        #}
+          reorderedPop[1,]<-solution
 
 
       }else if((it %% EDAfreq)==0){
 
         probsTable<-list()
+
+
+        #evalVals = apply(population,1,newevaluateRcppMem)
+
+        # population<-reorderedPop
+        # SolutionPopulation<-population
+        # 
+        # reorderedPop<-SolutionPopulation[order(evalVals),]
+
         elitePop<-reorderedPop[1:elitismR,]
         if (class(elitePop)[1]=="numeric"){ nColumns<-length(elitePop)
         for(ja in 1:nColumns){
@@ -232,63 +275,56 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
 
         #}
-
-      }
-
-      if (mutationChance > 0) {
-        #                    if (verbose) cat("  applying mutations... ");
-        # cat("  applying mutations... ");
-        mutationCount = 0;
-        for (object in (elitismR+1):popSize) { # don't mutate the best
-          for (var in 1:vars) {
-            if (runif(1) < mutationChance) { # ok, do mutation
-              genoma <- as.factor(reorderedPop[object,])
-              levels(genoma) <- c(1:length(levels(genoma)))
-              reorderedPop[object,] <- genoma
-              if (runif(1) <= (1-addStrataFactor)) {
-                mutation <- as.numeric(sample(levels(genoma),1))
+        if (mutationChance > 0) {
+          #                    if (verbose) cat("  applying mutations... ");
+          # cat("  applying mutations... ");
+          mutationCount = 0;
+          for (object in (elitismR+1):popSize) { # don't mutate the best
+            for (var in 1:vars) {
+              if (runif(1) < mutationChance) { # ok, do mutation
+                genoma <- as.factor(reorderedPop[object,])
+                levels(genoma) <- c(1:length(levels(genoma)))
+                reorderedPop[object,] <- genoma
+                if (runif(1) <= (1-addStrataFactor)) {
+                  mutation <- as.numeric(sample(levels(genoma),1))
+                }
+                else  {
+                  mutation <- max(as.numeric(levels(genoma)))+1
+                }
+                
+                # apply mutation, and delete known evalutation value
+                #&n bsp;
+                reorderedPop[object,var] = mutation;
+                Strata[object] = NA;
+                mutationCount = mutationCount + 1;
               }
-              else  {
-                mutation <- max(as.numeric(levels(genoma)))+1
-              }
-
-              # apply mutation, and delete known evalutation value
-              #&n bsp;
-              reorderedPop[object,var] = mutation;
-              Strata[object] = NA;
-              mutationCount = mutationCount + 1;
             }
           }
+          
+          
         }
-
-
       }
+
+  
 
       if (verbose==TRUE){
         cat("Calucating evaluation  values... ")}
 
-      population<-reorderedPop
-      evalVals = apply(population,1,evaluateRcppMem)
-      # cat("Min evals ", min(evalVals),"\n")
+     # population<-reorderedPop
 
-      bestEvals<- c(bestEvals,min(evalVals))
-      meanEvals[it] = mean(evalVals)
-      #plot(bestEvals,type="l")
-      SolutionPopulation<-population
-
-      reorderedPop<-SolutionPopulation[order(evalVals),]
-      population<-reorderedPop
       #}
 
 
     }
 
   }
-  evalVals = apply(population,1,evaluateRcppMem)
+
+  # cat("Min evals ", min(evalVals),"\n")
+
   result = list(stringMin = stringMin,
                 stringMax = stringMax, popSize = popSize, iters = iters,
                 suggestions = suggestions, population = population, elitism = elitismR,
-                mutationChance = mutationChance, evaluations = evalVals,
+                mutationChance = mutationChance, evaluations = evalVals, solution=solution,
                 best = min(evalVals),#min(apply(population,1,evaluateRcppMem)),
                 samplesizes=bestEvals, mean = meanEvals, TotalIterations=AllIters)
 
