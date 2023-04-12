@@ -45,19 +45,19 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   nvar<-length(grep("CV",names(err)))
   model=NULL
 
-  
-  dataset<-frame
-  
+
+ # frame<-dataset
+
   evaluateRcpp<-function(sugg){
-    
-    
+
+
     newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
                                 dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
                                   minnumstrat=minnumstrat,maxiter = 200, maxiter1 = 25,
                                   realAllocation=realAllocation)[1]))
-    
+
     return(res)
   }
   evaluateRcppMem <- memoise::memoise(evaluateRcpp)
@@ -93,7 +93,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       }
       i<-0
       population<-matrix(nrow = popSize, ncol = nrow(frame))
-      
+
       dataset<-frame
       fr<-frame
       for (object in 1:popSize) {
@@ -113,12 +113,12 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
           eval(parse(text=paste("fr$X",j," <- NULL",sep="")))
         }
-        
+
         for(i in 1:(ncuts+1)) {
           eval(parse(text=paste("fr$c",i,"<-0",sep="")))
           for(j in 1:nX) {
             eval(parse(text=paste("fr$c",i,"<-ifelse((fr$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr$c",i,")",sep="")))
-          }  
+          }
         }
         fr$X1=apply(fr[,c((ncol(fr)-ncuts):ncol(fr))],1,max)
         fr$X1 <- as.factor(fr$X1)
@@ -130,7 +130,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         fr$X1 <- as.numeric(fr$X1)
         population[object,]<-fr$X1
       }
-      
+
     }
     frame<-dataset
     # bestEvals = rep(NA, iters)
@@ -178,14 +178,14 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         if (verbose) cat(".");
       }
       # cat("Min evals ", min(evalVals),"\n")
-      
+
       bestEvals<- c(bestEvals,min(evalVals))
       meanEvals[it] = mean(evalVals)
       plot(bestEvals,type="l")
       SolutionPopulation<-population
-      
+
       reorderedPop<-SolutionPopulation[order(evalVals),]
-      
+
       meanEvals[it] = mean(evalVals)
 
       if(SAArun==TRUE && (it %% SAAiters)==0){
@@ -200,7 +200,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         # solution<- reorderedPop[which(evalVals==min(evalVals))[1],]
         solution<- reorderedPop[1,]
         sugg1<-suggestions
-       
+
 
           # cat("ia ", ia, "\n")
           sugg1$suggestions<- solution
@@ -223,7 +223,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                    verbose, dominio,minnumstrat,kmax_percent,ProbNewStratum,
                    strcens,writeFiles, showPlot=FALSE, minTemp, realAllocation)
           # cat("SAA sample size", res$best,"\n")
-         # resSample<-c(resSample,res$best)
+          #resSample<-c(resSample,res$best)
           bestEvals<- c(bestEvals,res$best)
           # outstrcor <- aggrStrata(stra, nvar,res$solution, censiti,
           #                         dominio=dominio)
@@ -250,7 +250,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
         # population<-reorderedPop
         # SolutionPopulation<-population
-        # 
+        #
         # reorderedPop<-SolutionPopulation[order(evalVals),]
 
         elitePop<-reorderedPop[1:elitismR,]
@@ -292,7 +292,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                 else  {
                   mutation <- max(as.numeric(levels(genoma)))+1
                 }
-                
+
                 # apply mutation, and delete known evalutation value
                 #&n bsp;
                 reorderedPop[object,var] = mutation;
@@ -301,12 +301,12 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
               }
             }
           }
-          
-          
+
+
         }
       }
 
-  
+
 
       if (verbose==TRUE){
         cat("Calucating evaluation  values... ")}
