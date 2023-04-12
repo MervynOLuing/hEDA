@@ -91,11 +91,11 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         pop[,var] = stringMin[var] +
           runif(popSize)*(stringMax[var]-stringMin[var]);
       }
-      i<-0
-      population<-matrix(nrow = popSize, ncol = nrow(frame))
+      
+      population<-matrix(nrow = popSize, ncol = nrow(stra))
 
-      dataset<-frame
-      fr<-frame
+      dataset<-stra
+      fr<-stra
       for (object in 1:popSize) {
         nX <- sum(grepl("X",colnames(fr)))
         for(i in 1:nX){
