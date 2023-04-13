@@ -16,9 +16,9 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   stra <- buildStrataDF(frame,progress=FALSE, verbose=FALSE)
   stringMin = rep(0,ncuts*sum(grepl("X",colnames(stra))))
   stringMax = rep(1,ncuts*sum(grepl("X",colnames(stra))))
-  
+
   nvar<-length(grep("CV",names(err)))
-  vars = length(stringMin)
+  vars = length(stringMax)
   nvars<-nrow( stra)
   if (is.na(mutationChance)) {
     mutationChance = 1/(vars + 1)
@@ -49,69 +49,11 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
  # frame<-dataset
  # dataset<-frame
-  evaluate <- function(dataset,
-                       cens,
-                       strcens,
-                       model,
-                       minnumstr,
-                       errors,
-                       string=c(),ncuts) {
-    fr <- dataset
-    nX <- sum(grepl("X",colnames(dataset)))
-    for(i in 1:nX){
-      eval(parse(text=paste("fr$ZZ",i,"<- fr$X",i,sep="")))
-    }
-    v<-string
-    for(j in 1:nX){
-      ini=(j-1)*(NROW(v)/nX)+1
-      fin=j*(NROW(v)/nX)
-      eval(parse(text=paste("v",j,"<-string[ini:fin]*max(fr$ZZ",j,")",sep="")))
-      eval(parse(text=paste("x",j,"_cuts<-as.data.frame(v",j,"[order(v",j,")],stringsAsFactors = TRUE)",sep="")))
-      eval(parse(text=paste("x",j,"_cuts<-as.data.frame(rbind(min(fr$ZZ",j,")",",x",j,"_cuts,max(fr$ZZ",j,")),stringsAsFactors = TRUE)",sep="")))
-      eval(parse(text=paste("x",j,"_cuts$lim<-x",j,"_cuts$`v",j,"[order(v",j,")]`",sep="")))
-      eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
-      eval(parse(text=paste("fr$X",j," <- NULL",sep="")))
-    }
-    
-    for(i in 1:(ncuts+1)) {
-      eval(parse(text=paste("fr$c",i,"<-0",sep="")))
-      for(j in 1:nX) {
-        eval(parse(text=paste("fr$c",i,"<-ifelse((fr$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr$c",i,")",sep="")))
-      }  
-    }
-    fr$X1=apply(fr[,c((ncol(fr)-ncuts):ncol(fr))],1,max)
-    fr$X1 <- as.factor(fr$X1)
-    if (max(levels(fr$X1)) > length(levels(fr$X1))) {
-      levels(fr$X1) <- c(1:length(levels(fr$X1)))
-      fr$X1 <- droplevels(fr$X1)
-      fr$X1 <- as.numeric(fr$X1)
-    }
-    fr$X1 <- as.numeric(fr$X1)
-    strata <- buildStrataDF(fr,model=model,progress = FALSE,verbose=FALSE)
-    if (strcens == TRUE) {
-      stratatot <- rbind(strata,cens)
-      soluz <- bethel(stratatot, 
-                      errors, 
-                      minnumstr, 
-                      printa = FALSE,
-                      realAllocation = realAllocation)
-    }
-    if (strcens == FALSE) {
-      soluz <- bethel(strata, 
-                      errors, 
-                      minnumstr, 
-                      printa = FALSE,
-                      realAllocation = realAllocation)
-    }
-    size <- sum(soluz)
-    size
-  }
-  
-  
+ 
   nvar<-length(grep("CV",names(err)))
   evaluateRcpp<-function(sugg){
-    
-    newstr<-aggrStrata(stra, nvar, sugg, censiti,
+
+    newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
                        dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
@@ -143,56 +85,14 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
     }    else {
       if (verbose)
       { cat("Starting with random values in the given domains...\n")}
-      pop = matrix(nrow = popSize, ncol = vars)
-      # fill values
-      for (var in 1:vars) {
-        pop[,var] = stringMin[var] +
-          runif(popSize)*(stringMax[var]-stringMin[var]);
-      }
       
       population<-matrix(nrow = popSize, ncol = nrow(stra))
-
-      dataset<-stra
-      fr1<-stra
-      fr1 <- dataset
-      nX <- sum(grepl("X",colnames(dataset)))
-      for(i in 1:nX){
-        eval(parse(text=paste("fr1$ZZ",i,"<- fr1$X",i,sep="")))
-      }
-      for (object in 1:popSize) {
-
-        string<-pop[object,]
-        v<-string
-        for(j in 1:nX){
-          ini=(j-1)*(NROW(v)/nX)+1
-          fin=j*(NROW(v)/nX)
-          eval(parse(text=paste("v",j,"<-string[ini:fin]*max(fr1$ZZ",j,")",sep="")))
-          eval(parse(text=paste("x",j,"_cuts<-as.data.frame(v",j,"[order(v",j,")],stringsAsFactors = TRUE)",sep="")))
-          eval(parse(text=paste("x",j,"_cuts<-as.data.frame(rbind(min(fr1$ZZ",j,")",",x",j,"_cuts,max(fr1$ZZ",j,")),
-                                stringsAsFactors = TRUE)",sep="")))
-          eval(parse(text=paste("x",j,"_cuts$lim<-x",j,"_cuts$`v",j,"[order(v",j,")]`",sep="")))
-          eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
-          eval(parse(text=paste("fr1$X",j," <- NULL",sep="")))
+      for (pop_i in 1:popSize) { # don't mutate the best
+          population[pop_i,]<-cluster::pam(stra[,3:(2+nvar)],initialStr)$cluster
         }
-        
-        for(i in 1:(ncuts+1)) {
-          eval(parse(text=paste("fr1$c",i,"<-0",sep="")))
-          for(j in 1:nX) {
-            eval(parse(text=paste("fr1$c",i,"<-ifelse((fr1$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr1$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr1$c",i,")",sep="")))
-          }  
-        }
-        fr1$X1=apply(fr1[,c((ncol(fr1)-ncuts):ncol(fr1))],1,max)
-        fr1$X1 <- as.factor(fr1$X1)
-        if (max(levels(fr1$X1)) > length(levels(fr1$X1))) {
-          levels(fr1$X1) <- c(1:length(levels(fr1$X1)))
-          fr1$X1 <- droplevels(fr1$X1)
-          fr1$X1 <- as.numeric(fr1$X1)
-        }
-        fr1$X1 <- as.numeric(fr1$X1)
-        population[object,]<-fr1$X1
-      }
+ 
 }
-    
+
     #frame<-dataset
     # bestEvals = rep(NA, iters)
     bestEvals<-NULL
@@ -231,7 +131,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       if (verbose==TRUE){
         cat(paste("Starting iteration", it, "\n"))}
 
-  
+
 
       meanEvals[it] = mean(evalVals)
 
@@ -310,7 +210,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         for(jb in 1:nColumns){
           probsTable[[jb]]<-table(elitePop[,jb])/sum(table(elitePop[,jb]))
         }
-        
+
 
 
         for(ic in (elitismR+1):nrow(reorderedPop)){
@@ -329,7 +229,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           # cat("  applying mutations... ");
           mutationCount = 0;
           for (object in (elitismR+1):popSize) { # don't mutate the best
-            for (var in 1:vars) {
+            for (var in 1:nrow(stra)) {
               if (runif(1) < mutationChance) { # ok, do mutation
                 genoma <- as.factor(reorderedPop[object,])
                 levels(genoma) <- c(1:length(levels(genoma)))
@@ -352,7 +252,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
 
         }
-        
+
         population<-reorderedPop
         for (object in 1:popSize) {
           #---- Modification:
@@ -362,13 +262,13 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
           if (verbose) cat(".");
         }
         # cat("Min evals ", min(evalVals),"\n")
-        
+
         bestEvals<- c(bestEvals,min(evalVals))
         meanEvals[it] = mean(evalVals)
         SolutionPopulation<-population
-        
+
         reorderedPop<-SolutionPopulation[order(evalVals),]
-      
+
       }
 
 
