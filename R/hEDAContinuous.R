@@ -13,12 +13,13 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   # stringMax <- rep(initialStr, nrow(stra))
   require("SamplingStrata")
   ncuts = (initialStr - 1)
-  stringMin = rep(0,ncuts*sum(grepl("X",colnames(frame))))
-  stringMax = rep(1,ncuts*sum(grepl("X",colnames(frame))))
   stra <- buildStrataDF(frame,progress=FALSE, verbose=FALSE)
+  stringMin = rep(0,ncuts*sum(grepl("X",colnames(stra))))
+  stringMax = rep(1,ncuts*sum(grepl("X",colnames(stra))))
+  
   nvar<-length(grep("CV",names(err)))
   vars = length(stringMin)
-  nvars<-nrow(stra)
+  nvars<-nrow( stra)
   if (is.na(mutationChance)) {
     mutationChance = 1/(vars + 1)
   }
@@ -42,26 +43,83 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   if (!(elitismR < popSize)) {
     stop("The population size must be greater than the elitism.")
   }
-  nvar<-length(grep("CV",names(err)))
+
   model=NULL
 
 
  # frame<-dataset
-
+ # dataset<-frame
+  evaluate <- function(dataset,
+                       cens,
+                       strcens,
+                       model,
+                       minnumstr,
+                       errors,
+                       string=c(),ncuts) {
+    fr <- dataset
+    nX <- sum(grepl("X",colnames(dataset)))
+    for(i in 1:nX){
+      eval(parse(text=paste("fr$ZZ",i,"<- fr$X",i,sep="")))
+    }
+    v<-string
+    for(j in 1:nX){
+      ini=(j-1)*(NROW(v)/nX)+1
+      fin=j*(NROW(v)/nX)
+      eval(parse(text=paste("v",j,"<-string[ini:fin]*max(fr$ZZ",j,")",sep="")))
+      eval(parse(text=paste("x",j,"_cuts<-as.data.frame(v",j,"[order(v",j,")],stringsAsFactors = TRUE)",sep="")))
+      eval(parse(text=paste("x",j,"_cuts<-as.data.frame(rbind(min(fr$ZZ",j,")",",x",j,"_cuts,max(fr$ZZ",j,")),stringsAsFactors = TRUE)",sep="")))
+      eval(parse(text=paste("x",j,"_cuts$lim<-x",j,"_cuts$`v",j,"[order(v",j,")]`",sep="")))
+      eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
+      eval(parse(text=paste("fr$X",j," <- NULL",sep="")))
+    }
+    
+    for(i in 1:(ncuts+1)) {
+      eval(parse(text=paste("fr$c",i,"<-0",sep="")))
+      for(j in 1:nX) {
+        eval(parse(text=paste("fr$c",i,"<-ifelse((fr$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr$c",i,")",sep="")))
+      }  
+    }
+    fr$X1=apply(fr[,c((ncol(fr)-ncuts):ncol(fr))],1,max)
+    fr$X1 <- as.factor(fr$X1)
+    if (max(levels(fr$X1)) > length(levels(fr$X1))) {
+      levels(fr$X1) <- c(1:length(levels(fr$X1)))
+      fr$X1 <- droplevels(fr$X1)
+      fr$X1 <- as.numeric(fr$X1)
+    }
+    fr$X1 <- as.numeric(fr$X1)
+    strata <- buildStrataDF(fr,model=model,progress = FALSE,verbose=FALSE)
+    if (strcens == TRUE) {
+      stratatot <- rbind(strata,cens)
+      soluz <- bethel(stratatot, 
+                      errors, 
+                      minnumstr, 
+                      printa = FALSE,
+                      realAllocation = realAllocation)
+    }
+    if (strcens == FALSE) {
+      soluz <- bethel(strata, 
+                      errors, 
+                      minnumstr, 
+                      printa = FALSE,
+                      realAllocation = realAllocation)
+    }
+    size <- sum(soluz)
+    size
+  }
+  
+  
+  nvar<-length(grep("CV",names(err)))
   evaluateRcpp<-function(sugg){
-
-
-    newstr<-aggrStrata_RcppOpen(stra, nvar, sugg, censiti,
-                                dominio)
+    
+    newstr<-aggrStrata(stra, nvar, sugg, censiti,
+                       dominio)
     newstr<-as.data.frame(newstr)
     res <- sum(unlist(bethel_alfa(newstr, err[,2:(nvar+1)],
                                   minnumstrat=minnumstrat,maxiter = 200, maxiter1 = 25,
                                   realAllocation=realAllocation)[1]))
-
     return(res)
   }
   evaluateRcppMem <- memoise::memoise(evaluateRcpp)
-
   censiti<-0
 
   if (vars > 0) {
@@ -95,44 +153,47 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       population<-matrix(nrow = popSize, ncol = nrow(stra))
 
       dataset<-stra
-      fr<-stra
+      fr1<-stra
+      fr1 <- dataset
+      nX <- sum(grepl("X",colnames(dataset)))
+      for(i in 1:nX){
+        eval(parse(text=paste("fr1$ZZ",i,"<- fr1$X",i,sep="")))
+      }
       for (object in 1:popSize) {
-        nX <- sum(grepl("X",colnames(fr)))
-        for(i in 1:nX){
-          eval(parse(text=paste("fr$ZZ",i,"<- fr$X",i,sep="")))
-        }
-        v<-pop[object,]
+
         string<-pop[object,]
+        v<-string
         for(j in 1:nX){
           ini=(j-1)*(NROW(v)/nX)+1
           fin=j*(NROW(v)/nX)
-          eval(parse(text=paste("v",j,"<-string[ini:fin]*max(fr$ZZ",j,")",sep="")))
+          eval(parse(text=paste("v",j,"<-string[ini:fin]*max(fr1$ZZ",j,")",sep="")))
           eval(parse(text=paste("x",j,"_cuts<-as.data.frame(v",j,"[order(v",j,")],stringsAsFactors = TRUE)",sep="")))
-          eval(parse(text=paste("x",j,"_cuts<-as.data.frame(rbind(min(fr$ZZ",j,")",",x",j,"_cuts,max(fr$ZZ",j,")),stringsAsFactors = TRUE)",sep="")))
+          eval(parse(text=paste("x",j,"_cuts<-as.data.frame(rbind(min(fr1$ZZ",j,")",",x",j,"_cuts,max(fr1$ZZ",j,")),
+                                stringsAsFactors = TRUE)",sep="")))
           eval(parse(text=paste("x",j,"_cuts$lim<-x",j,"_cuts$`v",j,"[order(v",j,")]`",sep="")))
           eval(parse(text=paste("x",j,"_cuts$`v",j,"[order(v",j,")]`<-NULL",sep="")))
-          eval(parse(text=paste("fr$X",j," <- NULL",sep="")))
+          eval(parse(text=paste("fr1$X",j," <- NULL",sep="")))
         }
-
+        
         for(i in 1:(ncuts+1)) {
-          eval(parse(text=paste("fr$c",i,"<-0",sep="")))
+          eval(parse(text=paste("fr1$c",i,"<-0",sep="")))
           for(j in 1:nX) {
-            eval(parse(text=paste("fr$c",i,"<-ifelse((fr$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr$c",i,")",sep="")))
-          }
+            eval(parse(text=paste("fr1$c",i,"<-ifelse((fr1$ZZ",j,">=x",j,"_cuts$lim[",i,"] & fr1$ZZ",j,"<= x",j,"_cuts$lim[",i+1,"]),",i,",fr1$c",i,")",sep="")))
+          }  
         }
-        fr$X1=apply(fr[,c((ncol(fr)-ncuts):ncol(fr))],1,max)
-        fr$X1 <- as.factor(fr$X1)
-        if (max(levels(fr$X1)) > length(levels(fr$X1))) {
-          levels(fr$X1) <- c(1:length(levels(fr$X1)))
-          fr$X1 <- droplevels(fr$X1)
-          fr$X1 <- as.numeric(fr$X1)
+        fr1$X1=apply(fr1[,c((ncol(fr1)-ncuts):ncol(fr1))],1,max)
+        fr1$X1 <- as.factor(fr1$X1)
+        if (max(levels(fr1$X1)) > length(levels(fr1$X1))) {
+          levels(fr1$X1) <- c(1:length(levels(fr1$X1)))
+          fr1$X1 <- droplevels(fr1$X1)
+          fr1$X1 <- as.numeric(fr1$X1)
         }
-        fr$X1 <- as.numeric(fr$X1)
-        population[object,]<-fr$X1
+        fr1$X1 <- as.numeric(fr1$X1)
+        population[object,]<-fr1$X1
       }
-
-    }
-    frame<-dataset
+}
+    
+    #frame<-dataset
     # bestEvals = rep(NA, iters)
     bestEvals<-NULL
     meanEvals = NULL
@@ -169,22 +230,8 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       Alliters<-it
       if (verbose==TRUE){
         cat(paste("Starting iteration", it, "\n"))}
-      population<-reorderedPop
-      for (object in 1:popSize) {
-        #---- Modification:
-        res <- evaluateRcppMem(population[object,])
-        evalVals[object] = res
-        #---- End modification:
-        if (verbose) cat(".");
-      }
-      # cat("Min evals ", min(evalVals),"\n")
 
-      bestEvals<- c(bestEvals,min(evalVals))
-      meanEvals[it] = mean(evalVals)
-      plot(bestEvals,type="l")
-      SolutionPopulation<-population
-
-      reorderedPop<-SolutionPopulation[order(evalVals),]
+  
 
       meanEvals[it] = mean(evalVals)
 
@@ -253,16 +300,17 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
         #
         # reorderedPop<-SolutionPopulation[order(evalVals),]
 
-        elitePop<-reorderedPop[1:elitismR,]
-        if (class(elitePop)[1]=="numeric"){ nColumns<-length(elitePop)
-        for(ja in 1:nColumns){
-          probsTable[[ja]]<-table(elitePop)/sum(table(elitePop))
-        }
-        }else{nColumns<-ncol(elitePop)
+        elitePop<-as.matrix(reorderedPop[1:elitismR,])
+        # if (class(elitePop)[1]=="numeric"){ nColumns<-length(elitePop)
+        # for(ja in 1:nColumns){
+        #   probsTable[[ja]]<-table(elitePop)/sum(table(elitePop))
+        # }
+        # }else{
+        nColumns<-ncol(elitePop)
         for(jb in 1:nColumns){
           probsTable[[jb]]<-table(elitePop[,jb])/sum(table(elitePop[,jb]))
         }
-        }
+        
 
 
         for(ic in (elitismR+1):nrow(reorderedPop)){
@@ -304,6 +352,23 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
 
         }
+        
+        population<-reorderedPop
+        for (object in 1:popSize) {
+          #---- Modification:
+          res <- evaluateRcppMem(population[object,])
+          evalVals[object] = res
+          #---- End modification:
+          if (verbose) cat(".");
+        }
+        # cat("Min evals ", min(evalVals),"\n")
+        
+        bestEvals<- c(bestEvals,min(evalVals))
+        meanEvals[it] = mean(evalVals)
+        SolutionPopulation<-population
+        
+        reorderedPop<-SolutionPopulation[order(evalVals),]
+      
       }
 
 
@@ -317,7 +382,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
 
     }
-
+    plot(bestEvals,type="l")
   }
 
   # cat("Min evals ", min(evalVals),"\n")
