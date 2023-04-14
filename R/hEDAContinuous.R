@@ -14,6 +14,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
   require("SamplingStrata")
 
   stra <- buildStrataDF(frame,progress=FALSE, verbose=FALSE)
+  nvar<-length(grep("CV",names(err)))
   stringMin <- rep(1, nrow(stra))
   stringMax <- rep(initialStr, nrow(stra))
 
