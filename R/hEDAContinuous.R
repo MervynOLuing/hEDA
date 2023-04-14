@@ -90,13 +90,12 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
       #population[1,]<-cluster::pam(stra[,3:(2+nvar)],initialStr)$cluster
       population[1,]<-  e1071::cmeans(stra[,3:(2+nvar)],
-                    initialStr, iter.max = 10,
+                    initialStr, iter.max = 1000,
                     method = "cmeans")$cluster
       pop_i<-2
+      groups <- as.factor(population[1,])
+       levels(genoma) <- c(1:length(levels(genoma)))
       for (pop_i in 2:popSize) { # don't mutate the best
-        groups <- as.factor(population[1,])
-        levels(genoma) <- c(1:length(levels(genoma)))
-
         population[pop_i,]<-population[1,]
         population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(genoma),1))
         }
