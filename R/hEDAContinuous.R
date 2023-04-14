@@ -15,7 +15,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
   stra <- buildStrataDF(frame,progress=FALSE, verbose=FALSE)
   stringMin <- rep(1, nrow(stra))
-  stringMax <- rep(initialStrata, nrow(stra))
+  stringMax <- rep(initialStr, nrow(stra))
 
   vars = nrow(stra)
   if (is.na(mutationChance)) {
