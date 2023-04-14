@@ -1,6 +1,6 @@
 #'parallelhEDAContinuous
 #'@export
-parallelhEDAContinuous<-function(frame, cv,
+parallelhEDA<-function(frame, cv,
                                  sugg,
                                  Temp=0.0001,initialStrata=15, decrement_constant=0.95, end_time =140,
                                  jsize=5,length_of_markov_chain =50,
