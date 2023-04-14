@@ -73,15 +73,23 @@ hEDA<-function (stra, err, suggestions =NULL,
                                                 stringMin[var])
       }
     }    else {
-      if (verbose)
-      { cat("Starting with random values in the given domains...\n")}
-      population = matrix(nrow = popSize, ncol = vars)
-      for (var in 1:vars) {
-        population[, var] = stringMin[var] + runif(popSize) *
-          (stringMax[var] - stringMin[var])
-      }
+           if (verbose)
+      { cat("Gerating stratifications using fuzzy clustering...\n")}
+
+      population<-matrix(nrow = popSize, ncol = nrow(stra))
 
 
+      #population[1,]<-cluster::pam(stra[,3:(2+nvar)],initialStr)$cluster
+      population[1,]<-  e1071::cmeans(stra[,3:(2+nvar)],
+                    initialStr, iter.max = 1000,
+                    method = "cmeans")$cluster
+      pop_i<-2
+      groups <- as.factor(population[1,])
+       levels(groups) <- c(1:length(levels(groups)))
+      for (pop_i in 2:popSize) { # don't mutate the best
+        population[pop_i,]<-population[1,]
+        population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(group),1))
+        }
     }
    # bestEvals = rep(NA, iters)
     bestEvals<-NULL
