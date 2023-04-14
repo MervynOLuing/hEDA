@@ -40,7 +40,9 @@ parallelhEDA<-function(strata, cv,
 
     nvar=length(grep("CV",names(cv[i,])))
     stra=strata[which(strata$DOM1==dom[i]),];err=cv[i,];
-    suggestions =sugg[which(sugg$domainvalue==dom[i]),];
+   if (!is.null(sugg)){
+      suggestions =sugg[which(sugg$domainvalue==dom[i]),];
+    }else {suggestions<-NULL}
     Temp=Temp;nStrat=initialStrata[i]; decrement_constant=decrement_constant; end_time =end_time;
     jsize=jsize;length_of_markov_chain =length_of_markov_chain;
     SAArun=SAArun;SAAiters=SAAiters;
