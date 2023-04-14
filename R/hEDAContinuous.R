@@ -84,7 +84,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
       }
     }    else {
       if (verbose)
-      { cat("Starting with random values in the given domains...\n")}
+      { cat("Generating stratifications...\n")}
 
       population<-matrix(nrow = popSize, ncol = nrow(stra))
 
