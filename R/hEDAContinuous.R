@@ -95,7 +95,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
                     method = "cmeans")$cluster
       pop_i<-2
       groups <- as.factor(population[1,])
-       levels(genoma) <- c(1:length(levels(genoma)))
+       levels(groups) <- c(1:length(levels(groups)))
       for (pop_i in 2:popSize) { # don't mutate the best
         population[pop_i,]<-population[1,]
         population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(genoma),1))
@@ -256,7 +256,7 @@ hEDAContinuous<-function (frame, err, suggestions =NULL,
 
       #}
 
-        plot(bestEvals,type="l")
+        #plot(bestEvals,type="l")
     }
 
   }
