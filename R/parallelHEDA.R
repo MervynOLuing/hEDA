@@ -1,16 +1,16 @@
-#'parallelhEDAContinuous
+#'parallelhEDA
 #'@export
-parallelhEDA<-function(frame, cv,
-                                 sugg,
-                                 Temp=0.0001,initialStrata=15, decrement_constant=0.95, end_time =140,
-                                 jsize=5,length_of_markov_chain =50,
-                                 SAArun=TRUE,SAAiters=50,
-                                 popSize = 20, iters = 100, mutationChance = 0.01, elitism = 0.1,
-                                 addStrataFactor=0.000001, EDAfreq=1,
-                                 verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
-                                 strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
- 
-if (writeFiles == TRUE) {
+parallelhEDA<-function(strata, cv,
+                       sugg,
+                       Temp=0.0001,initialStrata=15, decrement_constant=0.95, end_time =140,
+                       jsize=5,length_of_markov_chain =50,
+                       SAArun=TRUE,SAAiters=50,
+                       popSize = 20, iters = 100, mutationChance = 0.01, elitism = 0.1,
+                       addStrataFactor=0.000001, EDAfreq=1,
+                       verbose = FALSE, dominio=dominio,minnumstrat=2,kmax_percent=0.025,ProbNewStratum=0.0001,
+                       strcens=FALSE,writeFiles=FALSE, showPlot=TRUE, minTemp = 0.000005, realAllocation=TRUE){
+
+  if (writeFiles == TRUE) {
     dire <- getwd()
     direnew <- paste(dire, "/output", sep = "")
     if (dir.exists(direnew))
@@ -21,9 +21,8 @@ if (writeFiles == TRUE) {
   require("foreach")
   require("parallel")
   require("doParallel")
-  require("SamplingStrata")
   #thanks to: https://towardsdatascience.com/getting-started-with-parallel-programming-in-r-d5f801d43745
-  dom<-unique(frame$domainvalue)
+  dom<-unique(strata$DOM1)
   ndom<-length(dom)
   cores<-(detectCores())-1
   if (ndom < cores) {cores <-ndom}
@@ -36,16 +35,12 @@ if (writeFiles == TRUE) {
   r <- foreach::foreach(i = 1:ndom,
                         .combine = rbind,
                         #.packages = c("hEDA")
-                        .packages = c("hEDA","Rcpp2doParallel","SamplingStrata")#,.verbose = TRUE
+                        .packages = c("hEDA","Rcpp2doParallel")#,.verbose = TRUE
   ) %dopar% {
 
-
-    if (!is.null(sugg)){
-      suggestions =sugg[which(sugg$domainvalue==dom[i]),];
-    }else {suggestions<-NULL}
-
     nvar=length(grep("CV",names(cv[i,])))
-    fr=frame[which(frame$domainvalue==dom[i]),];err=cv[i,];
+    stra=strata[which(strata$DOM1==dom[i]),];err=cv[i,];
+    suggestions =sugg[which(sugg$domainvalue==dom[i]),];
     Temp=Temp;nStrat=initialStrata[i]; decrement_constant=decrement_constant; end_time =end_time;
     jsize=jsize;length_of_markov_chain =length_of_markov_chain;
     SAArun=SAArun;SAAiters=SAAiters;
@@ -54,14 +49,14 @@ if (writeFiles == TRUE) {
     verbose = verbose; dominio=dom[i];minnumstrat=minnumstrat;kmax_percent=kmax_percent;ProbNewStratum=ProbNewStratum;
     strcens=strcens;writeFiles=writeFiles; showPlot=showPlot; minTemp = minTemp; realAllocation=realAllocation
     censiti <-0
-   hEDA(fr, err, suggestions ,
-                   Temp,initialStr=nStrat, decrement_constant, end_time,
-                   jsize,length_of_markov_chain,
-                   SAArun,SAAiters,
-                   popSize, iters, mutationChance, elitism,
-                   addStrataFactor, EDAfreq,
-                   verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
-                   strcens,writeFiles, showPlot, minTemp, realAllocation)
+    hEDA(stra, err, suggestions ,
+         Temp,initialStr=nStrat, decrement_constant, end_time,
+         jsize,length_of_markov_chain,
+         SAArun,SAAiters,
+         popSize, iters, mutationChance, elitism,
+         addStrataFactor, EDAfreq,
+         verbose,dominio=dom[i],minnumstrat,kmax_percent,ProbNewStratum,
+         strcens,writeFiles, showPlot, minTemp, realAllocation)
 
 
 
@@ -143,4 +138,3 @@ if (writeFiles == TRUE) {
 
   return(result)
 }
-
