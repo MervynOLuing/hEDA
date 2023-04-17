@@ -86,7 +86,7 @@ hEDA<-function (stra, err, suggestions =NULL,
       pop_i<-2
       groups <- as.factor(population[1,])
        levels(groups) <- c(1:length(levels(groups)))
-      for (pop_i in 2:popSize) { # don't mutate the best
+      for (pop_i in 2:popSize) { 
         population[pop_i,]<-population[1,]
         population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(groups),1))
         }
