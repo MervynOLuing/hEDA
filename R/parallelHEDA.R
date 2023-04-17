@@ -54,7 +54,7 @@ if (writeFiles == TRUE) {
     verbose = verbose; dominio=dom[i];minnumstrat=minnumstrat;kmax_percent=kmax_percent;ProbNewStratum=ProbNewStratum;
     strcens=strcens;writeFiles=writeFiles; showPlot=showPlot; minTemp = minTemp; realAllocation=realAllocation
     censiti <-0
-   hEDAContinuous(fr, err, suggestions ,
+   hEDA(fr, err, suggestions ,
                    Temp,initialStr=nStrat, decrement_constant, end_time,
                    jsize,length_of_markov_chain,
                    SAArun,SAAiters,
