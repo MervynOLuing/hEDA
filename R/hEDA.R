@@ -88,7 +88,7 @@ hEDA<-function (stra, err, suggestions =NULL,
        levels(groups) <- c(1:length(levels(groups)))
       for (pop_i in 2:popSize) { # don't mutate the best
         population[pop_i,]<-population[1,]
-        population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(group),1))
+        population[pop_i,sample(vars,1)]<- as.numeric(sample(levels(groups),1))
         }
     }
    # bestEvals = rep(NA, iters)
